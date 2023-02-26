@@ -44,3 +44,12 @@ services:
     image: nazarpc/phpmyadmin
     depends_on:
       - db
+
+  adminer:
+    image: adminer:latest
+    container_name: template_docker_adminer
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "8002:8080"

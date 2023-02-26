@@ -1,8 +1,12 @@
 FROM php:8.1-apache
 
+ENV ACCEPT_EULA=Y
+ENV DEBIAN_FRONTEND=noninteractive
+
 # Install dependencies
 RUN apt-get update && apt-get install -y \
     unzip \
+    curl \
     zip \
     wget \
     libssl-dev \
@@ -14,13 +18,27 @@ RUN a2enmod rewrite
 # Install SQL Server Driver
 RUN apt-get update && apt-get install -y \
     gnupg \
+    gnupg2 \
     unixodbc-dev \
     freetds-dev \
     && apt-get update && apt-get install -y \
-    && pecl install pdo_sqlsrv \
-    && docker-php-ext-enable pdo_sqlsrv \
     && docker-php-ext-install pdo \
     && docker-php-ext-install pdo_mysql
+
+# Microsoft SQL Server Prerequisites
+RUN apt-get update \
+    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
+    && curl https://packages.microsoft.com/config/debian/9/prod.list \
+        > /etc/apt/sources.list.d/mssql-release.list \
+    && apt-get update \
+    && apt-get -y --no-install-recommends install \
+        unixodbc-dev \
+        msodbcsql17 \
+
+RUN apt-get update && \
+    pecl install sqlsrv && \
+    pecl install pdo_sqlsrv && \
+    docker-php-ext-enable sqlsrv pdo_sqlsrv
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
