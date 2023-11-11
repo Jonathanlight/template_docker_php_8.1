@@ -5,51 +5,33 @@ services:
     container_name: template_docker_apache
     build: ./docker/build/apache
     ports:
-      - "8000:80"
+      - '8000:80'
+      - '8443:443'
     depends_on:
       - mysql
-      - db
     volumes:
-      - ./docker/etc/apache/virtualhost.conf:/etc/apache2/sites-enabled/000-default.conf:ro
-      - ./docker/etc/php/php.ini:/usr/local/etc/php/php.ini
-      - ./docker/etc/php/php-cli.ini:/usr/local/etc/php/php-cli.ini
-      - ./app/symfony:/var/www/symfony
-
-  # CONTAINER MYSQL #
+      - './docker/etc/apache/virtualhost.conf:/etc/apache2/sites-enabled/000-default.conf:ro'
+      - './docker/etc/apache/default-ssl.conf:/etc/apache2/sites-enabled/default-ssl.conf'
+      - './docker/etc/php/php.ini:/usr/local/etc/php/php.ini'
+      - './docker/etc/php/php-cli.ini:/usr/local/etc/php/php-cli.ini'
+      - './docker/etc/apache/ssl/:/etc/apache2/conf/ssl'
+      - './app/symfony:/var/www/symfony'
   mysql:
     container_name: template_docker_mysql
     image: mysql:5.7
     ports:
       - "3306:3306"
     volumes:
-      - ./docker/etc/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
-      - ./data:/data
+      - './docker/etc/mysql/my.cnf:/etc/mysql/conf.d/my.cnf'
+      - './docker/etc/mysql/data:/var/lib/mysql'
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: symfony_db
 
-  db:
-    container_name: template_docker_sql_server
-    image: mcr.microsoft.com/mssql/server
-    ports:
-      - "1433:1433"
-    environment:
-      ACCEPT_EULA: 'Y'
-      MSSQL_SA_PASSWORD: '${SQL_SERVER_PASSWORD}'
-
   phpmyadmin:
     container_name: template_docker_phpmyadmin
     ports:
-      - "8001:80"
+      - '8001:80'
     image: nazarpc/phpmyadmin
     depends_on:
-      - db
-
-  adminer:
-    image: adminer:latest
-    container_name: template_docker_adminer
-    restart: always
-    depends_on:
-      - db
-    ports:
-      - "8002:8080"
+      - mysql

@@ -1,5 +1,6 @@
 FROM php:8.1-apache
 
+ARG TIMEZONE="Europe/Paris"
 ENV ACCEPT_EULA=Y
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -9,11 +10,15 @@ RUN apt-get update && apt-get install -y \
     curl \
     zip \
     wget \
+    ssh \
     libssl-dev \
-    libffi-dev
+    libffi-dev \
+    ca-certificates \
+    nano
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
+# Apache SSL
+RUN a2enmod ssl rewrite headers
+RUN a2ensite default-ssl
 
 # Install SQL Server Driver
 RUN apt-get update && apt-get install -y \
@@ -25,21 +30,6 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install pdo \
     && docker-php-ext-install pdo_mysql
 
-# Microsoft SQL Server Prerequisites
-RUN apt-get update \
-    && curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
-    && curl https://packages.microsoft.com/config/debian/9/prod.list \
-        > /etc/apt/sources.list.d/mssql-release.list \
-    && apt-get update \
-    && apt-get -y --no-install-recommends install \
-        unixodbc-dev \
-        msodbcsql17 \
-
-RUN apt-get update && \
-    pecl install sqlsrv && \
-    pecl install pdo_sqlsrv && \
-    docker-php-ext-enable sqlsrv pdo_sqlsrv
-
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
@@ -50,13 +40,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Set working directory
 WORKDIR /var/www/symfony
 
-## Symfony cache folder
-RUN groupadd dev -g 999
-RUN useradd dev -g dev -d /var/www/symfony -m
-RUN chown -R dev:dev /var/www/symfony
-
-# Expose port 80
-EXPOSE 80
+# Expose port 80 443
+EXPOSE 80 443
 
 # Start Apache
 CMD ["apache2-foreground"]

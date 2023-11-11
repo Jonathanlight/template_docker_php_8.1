@@ -1,0 +1,15 @@
+.idea
+.vscode
+.DS_Store
+
+/app/symfony/.env.local
+/app/symfony/.env.local.php
+/app/symfony/.env.*.local
+/app/symfony/config/secrets/prod/prod.decrypt.private.php
+/app/symfony/public/bundles/
+/app/symfony/var/
+/app/symfony/vendor/
+
+/docker/etc/mysql/data/
+/docker/etc/apache/ssl/server.crt
+/docker/etc/apache/ssl/server.key
