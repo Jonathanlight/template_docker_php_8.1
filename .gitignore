@@ -9,6 +9,7 @@
 /app/symfony/public/bundles/
 /app/symfony/var/
 /app/symfony/vendor/
+/app/symfony/node_modules/
 
 /docker/etc/mysql/data/
 /docker/etc/apache/ssl/server.crt
